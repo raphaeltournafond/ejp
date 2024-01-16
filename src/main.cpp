@@ -1,18 +1,20 @@
 #include <Arduino.h>
 
-// put function declarations here:
-int myFunction(int, int);
+const int builtInLed = 2;  // GPIO pin for the built-in LED
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(115200); // Default 9600
+  pinMode(builtInLed, OUTPUT);
+  delay(2000);  // Tempo to open the Serial Monitor
+  Serial.println("Hello, ESP32!");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
+  digitalWrite(builtInLed, HIGH);
+  Serial.println("Built-in LED ON");
+  delay(1000);
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  digitalWrite(builtInLed, LOW);
+  Serial.println("Built-in LED OFF");
+  delay(1000);
 }

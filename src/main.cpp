@@ -3,6 +3,7 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <HTTPClient.h>
+#include <ArduinoJson.h>
 
 const char *ssid = "ssid";
 const char *password = "password";
@@ -60,7 +61,36 @@ void setup() {
     if (httpCode == HTTP_CODE_OK) { // TODO retry a few time if not working here
       String payload = http.getString(); // Formatting
       Serial.println(payload);
-      // Process of the payload will go here
+      
+      // Parsing payload
+      JsonDocument doc;
+      DeserializationError error = deserializeJson(doc, payload);
+
+      if (!error) {
+        bool isEjpToday = false;
+        bool isEjpTomorrow = false;
+
+        // Access calendar data
+        const int calendarLength = doc["content"]["options"][0]["calendrier"].size();
+        const char *tomorrowStatus = doc["content"]["options"][0]["calendrier"][calendarLength-1]["statut"];
+        const char *todayStatus = doc["content"]["options"][0]["calendrier"][calendarLength-2]["statut"];
+
+        // EJP check
+        if (strcmp(tomorrowStatus, "EJP") == 0) {
+          isEjpTomorrow = true;
+        }
+        if (strcmp(todayStatus, "EJP") == 0) {
+          isEjpToday = true;
+        }
+
+        // Printing values for now, connecting to LED later
+        Serial.print("Is EJP Today: ");
+        Serial.println(isEjpToday);
+        Serial.print("Is EJP Tomorrow: ");
+        Serial.println(isEjpTomorrow);
+      } else {
+        Serial.println("Error parsing JSON");
+      }
     } else {
       Serial.println("Error in HTTP request");
     }

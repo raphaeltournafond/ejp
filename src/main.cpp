@@ -57,7 +57,7 @@ void setup() {
   HTTPClient http;
   if (http.begin(apiUrl)) {
     int httpCode = http.GET();
-    if (httpCode == HTTP_CODE_OK) {
+    if (httpCode == HTTP_CODE_OK) { // TODO retry a few time if not working here
       String payload = http.getString(); // Formatting
       Serial.println(payload);
       // Process of the payload will go here

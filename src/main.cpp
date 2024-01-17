@@ -1,20 +1,24 @@
 #include <Arduino.h>
+#include <WiFi.h>
 
-const int builtInLed = 2;  // GPIO pin for the built-in LED
+const char *ssid = "ssid";
+const char *password = "password";
 
 void setup() {
-  Serial.begin(115200); // Default 9600
-  pinMode(builtInLed, OUTPUT);
-  delay(2000);  // Tempo to open the Serial Monitor
-  Serial.println("Hello, ESP32!");
+  Serial.begin(115200);
+
+  // Initiate WiFi connection
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000); // Higher in production, rate limiting TODO
+    Serial.println("Connecting to WiFi...");
+  }
+
+  Serial.println("WiFi connected!");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
 }
 
 void loop() {
-  digitalWrite(builtInLed, HIGH);
-  Serial.println("Built-in LED ON");
-  delay(1000);
-
-  digitalWrite(builtInLed, LOW);
-  Serial.println("Built-in LED OFF");
-  delay(1000);
+  // loop content
 }

@@ -21,12 +21,8 @@ const char *baseUrl = "https://api-commerce.edf.fr/commerce/activet/v1/calendrie
 const int todayLedPin = 12;
 const int tomorrowLedPin = 13;
 
-void setup() {
-  Serial.begin(115200);
-
-  // Init led state
-  pinMode(todayLedPin, OUTPUT);
-  pinMode(tomorrowLedPin, OUTPUT);
+void fetchAndProcessEjpData() {
+  Serial.println("Checking for EJP days...");
 
   // Initiate WiFi connection
   WiFi.begin(ssid, password);
@@ -110,6 +106,19 @@ void setup() {
   } else {
     Serial.println("Failed to connect to API");
   }
+
+  WiFi.disconnect(true);
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  // Init led state
+  pinMode(todayLedPin, OUTPUT);
+  pinMode(tomorrowLedPin, OUTPUT);
+
+  // Initial data retrieval at setup, easier debugging
+  fetchAndProcessEjpData();
 }
 
 void loop() {

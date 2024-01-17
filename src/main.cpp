@@ -23,11 +23,59 @@ const int tomorrowLedPin = 13;
 const int errorLedPin = 4;
 
 // Check at desired times, 24H format, default 16, 18, 20, modify as needed
-const int checkTimes[] = {16, 18, 20}; // 4, 6, 8pm
+const int checkTimes[] = {16, 18, 20, 23, 20}; // 4, 6, 8pm
 const int lengthCheckTimes = sizeof(checkTimes) / sizeof(checkTimes[0]);
 
 const int rateLimit = 10; // Request rate limit
-bool errorOccured = false;
+bool errorOccured = true;
+
+void animateError() {
+  digitalWrite(errorLedPin, HIGH);
+  delay(100);
+  digitalWrite(errorLedPin, LOW);
+  delay(5000);
+}
+
+void animateWifi() {
+  digitalWrite(todayLedPin, LOW);
+  digitalWrite(tomorrowLedPin, LOW);
+  digitalWrite(errorLedPin, LOW);
+  for (int i = 0; i < 5; ++i) {
+    digitalWrite(todayLedPin, HIGH);
+    delay(50);
+    digitalWrite(tomorrowLedPin, HIGH);
+    delay(50);
+    digitalWrite(todayLedPin, LOW);
+    delay(50);
+    digitalWrite(tomorrowLedPin, LOW);
+    delay(50);
+  }
+}
+
+void animateSuccess() {
+  digitalWrite(todayLedPin, LOW);
+  digitalWrite(tomorrowLedPin, LOW);
+  digitalWrite(errorLedPin, LOW);
+  for (int i = 0; i < 5; ++i) {
+    digitalWrite(todayLedPin, HIGH);
+    delay(100);
+    digitalWrite(todayLedPin, LOW);
+    digitalWrite(tomorrowLedPin, HIGH);
+    delay(100);
+    digitalWrite(tomorrowLedPin, LOW);
+    digitalWrite(errorLedPin, HIGH);
+    delay(100);
+    digitalWrite(errorLedPin, LOW);
+  }
+  for (int i = 0; i < 3; ++i) {
+    digitalWrite(todayLedPin, HIGH);
+    digitalWrite(tomorrowLedPin, HIGH);
+    delay(50);
+    digitalWrite(todayLedPin, LOW);
+    digitalWrite(tomorrowLedPin, LOW);
+    delay(50);
+  }
+}
 
 void fetchAndProcessEjpData() {
   Serial.println("Checking for EJP days...");
@@ -45,7 +93,7 @@ void fetchAndProcessEjpData() {
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
     errorOccured = false;
-    digitalWrite(errorLedPin, LOW); // Reset LED
+    animateWifi();
   } else {
     Serial.println("Failed to connect to WiFi");
     errorOccured = true;
@@ -136,38 +184,6 @@ void fetchAndProcessEjpData() {
   errorOccured = !success;
 
   WiFi.disconnect(true);
-}
-
-void animateError() {
-  digitalWrite(errorLedPin, HIGH);
-  delay(100);
-  digitalWrite(errorLedPin, LOW);
-  delay(5000);
-}
-
-void animateSuccess() {
-  digitalWrite(todayLedPin, LOW);
-  digitalWrite(tomorrowLedPin, LOW);
-  digitalWrite(errorLedPin, LOW);
-  for (int i = 0; i < 5; ++i) {
-    digitalWrite(todayLedPin, HIGH);
-    delay(100);
-    digitalWrite(todayLedPin, LOW);
-    digitalWrite(tomorrowLedPin, HIGH);
-    delay(100);
-    digitalWrite(tomorrowLedPin, LOW);
-    digitalWrite(errorLedPin, HIGH);
-    delay(100);
-    digitalWrite(errorLedPin, LOW);
-  }
-  for (int i = 0; i < 3; ++i) {
-    digitalWrite(todayLedPin, HIGH);
-    digitalWrite(tomorrowLedPin, HIGH);
-    delay(50);
-    digitalWrite(todayLedPin, LOW);
-    digitalWrite(tomorrowLedPin, LOW);
-    delay(50);
-  }
 }
 
 void setup() {

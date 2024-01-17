@@ -27,8 +27,6 @@ void setup() {
   // Init led state
   pinMode(todayLedPin, OUTPUT);
   pinMode(tomorrowLedPin, OUTPUT);
-  digitalWrite(todayLedPin, LOW);
-  digitalWrite(tomorrowLedPin, LOW);
 
   // Initiate WiFi connection
   WiFi.begin(ssid, password);
@@ -82,7 +80,7 @@ void setup() {
         // Access calendar data
         const int calendarLength = doc["content"]["options"][0]["calendrier"].size();
         const char *tomorrowStatus = doc["content"]["options"][0]["calendrier"][calendarLength-1]["statut"];
-        const char *todayStatus = doc["content"]["options"][0]["calendrier"][calendarLength-2]["statut"];
+        const char *todayStatus = doc["content"]["options"][0]["calendrier"][calendarLength-3]["statut"];
 
         // EJP check
         if (strcmp(tomorrowStatus, "EJP") == 0) {
@@ -99,6 +97,9 @@ void setup() {
         Serial.println(isEjpToday);
         Serial.print("Is EJP Tomorrow: ");
         Serial.println(isEjpTomorrow);
+
+        isEjpToday ? digitalWrite(todayLedPin, HIGH) : digitalWrite(todayLedPin, LOW);
+        isEjpTomorrow ? digitalWrite(tomorrowLedPin, HIGH) : digitalWrite(tomorrowLedPin, LOW);
       } else {
         Serial.println("Error parsing JSON");
       }

@@ -116,8 +116,8 @@ void fetchAndProcessEjpData() {
           Serial.print("Is EJP Tomorrow: ");
           Serial.println(isEjpTomorrow);
 
-          isEjpToday ? digitalWrite(todayLedPin, HIGH) : digitalWrite(todayLedPin, LOW);
-          isEjpTomorrow ? digitalWrite(tomorrowLedPin, HIGH) : digitalWrite(tomorrowLedPin, LOW);
+          digitalWrite(todayLedPin, isEjpToday ? HIGH : LOW);
+          digitalWrite(tomorrowLedPin, isEjpTomorrow ? HIGH : LOW);
 
           success = true;
         } else {

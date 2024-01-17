@@ -80,7 +80,7 @@ void fetchAndProcessEjpData() {
         // Access calendar data
         const int calendarLength = doc["content"]["options"][0]["calendrier"].size();
         const char *tomorrowStatus = doc["content"]["options"][0]["calendrier"][calendarLength-1]["statut"];
-        const char *todayStatus = doc["content"]["options"][0]["calendrier"][calendarLength-3]["statut"];
+        const char *todayStatus = doc["content"]["options"][0]["calendrier"][calendarLength-2]["statut"];
 
         // EJP check
         if (strcmp(tomorrowStatus, "EJP") == 0) {

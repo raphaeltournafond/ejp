@@ -25,19 +25,27 @@ const int tomorrowLedPin = 13;
 const int checkTimes[] = {16, 18, 20}; // 4, 6, 8pm
 const int lengthCheckTimes = sizeof(checkTimes) / sizeof(checkTimes[0]);
 
+const int rateLimit = 5; // Request rate limit
+
 void fetchAndProcessEjpData() {
   Serial.println("Checking for EJP days...");
 
   // Initiate WiFi connection
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000); // Higher in production, rate limiting TODO
+  
+  for (int i = 0; i < rateLimit && WiFi.status() != WL_CONNECTED; ++i) {
+    delay(1000);
     Serial.println("Connecting to WiFi...");
   }
 
-  Serial.println("WiFi connected!");
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("WiFi connected!");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("Failed to connect to WiFi");
+    return;
+  }
 
   // Init and sync time
   timeClient.begin();
@@ -136,7 +144,4 @@ void loop() {
       delay(60000);
     }
   }
-
-  // Limit checks to 2 times per minute
-  delay(30000);
 }

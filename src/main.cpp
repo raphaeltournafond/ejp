@@ -21,6 +21,10 @@ const char *baseUrl = "https://api-commerce.edf.fr/commerce/activet/v1/calendrie
 const int todayLedPin = 12;
 const int tomorrowLedPin = 13;
 
+// Check at desired times, 24H format, default 16, 18, 20, modify as needed
+const int checkTimes[] = {16, 18, 20}; // 4, 6, 8pm
+const int lengthCheckTimes = sizeof(checkTimes) / sizeof(checkTimes[0]);
+
 void fetchAndProcessEjpData() {
   Serial.println("Checking for EJP days...");
 
@@ -123,4 +127,16 @@ void setup() {
 
 void loop() {
   // loop content
+
+  // Check for EJP days at specified times
+  for (int i = 0; i < lengthCheckTimes; ++i) {
+    if (timeClient.getHours() == checkTimes[i] && timeClient.getMinutes() == 0) {
+      fetchAndProcessEjpData();
+      // Prevent calling two times during the same minute
+      delay(60000);
+    }
+  }
+
+  // Limit checks to 2 times per minute
+  delay(30000);
 }

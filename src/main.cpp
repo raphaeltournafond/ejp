@@ -75,54 +75,65 @@ void fetchAndProcessEjpData() {
   // Construct the full API url
   String apiUrl = String(baseUrl) + "&dateApplicationBorneInf=" + inferiorLimit + "&dateApplicationBorneSup=" + superiorLimit;
   Serial.println(apiUrl);
+
   // Data fetching
   HTTPClient http;
-  if (http.begin(apiUrl)) {
-    int httpCode = http.GET();
-    if (httpCode == HTTP_CODE_OK) { // TODO retry a few time if not working here
-      String payload = http.getString(); // Formatting
-      
-      // Parsing payload
-      JsonDocument doc;
-      DeserializationError error = deserializeJson(doc, payload);
 
-      if (!error) {
-        bool isEjpToday = false;
-        bool isEjpTomorrow = false;
+  bool success = false;
 
-        // Access calendar data
-        const int calendarLength = doc["content"]["options"][0]["calendrier"].size();
-        const char *tomorrowStatus = doc["content"]["options"][0]["calendrier"][calendarLength-1]["statut"];
-        const char *todayStatus = doc["content"]["options"][0]["calendrier"][calendarLength-2]["statut"];
+  for (int retry = 0; retry < rateLimit && !success; ++retry) {
+    if (http.begin(apiUrl)) {
+      int httpCode = http.GET();
+      if (httpCode == HTTP_CODE_OK) {
+        String payload = http.getString(); // Formatting
+        
+        // Parsing payload
+        JsonDocument doc;
+        DeserializationError error = deserializeJson(doc, payload);
 
-        // EJP check
-        if (strcmp(tomorrowStatus, "EJP") == 0) {
-          isEjpTomorrow = true;
-          digitalWrite(tomorrowLedPin, HIGH);
+        if (!error) {
+          bool isEjpToday = false;
+          bool isEjpTomorrow = false;
+
+          // Access calendar data
+          const int calendarLength = doc["content"]["options"][0]["calendrier"].size();
+          const char *tomorrowStatus = doc["content"]["options"][0]["calendrier"][calendarLength-1]["statut"];
+          const char *todayStatus = doc["content"]["options"][0]["calendrier"][calendarLength-2]["statut"];
+
+          // EJP check
+          if (strcmp(tomorrowStatus, "EJP") == 0) {
+            isEjpTomorrow = true;
+            digitalWrite(tomorrowLedPin, HIGH);
+          }
+          if (strcmp(todayStatus, "EJP") == 0) {
+            isEjpToday = true;
+            digitalWrite(todayLedPin, HIGH);
+          }
+
+          // Printing values for now, connecting to LED later
+          Serial.print("Is EJP Today: ");
+          Serial.println(isEjpToday);
+          Serial.print("Is EJP Tomorrow: ");
+          Serial.println(isEjpTomorrow);
+
+          isEjpToday ? digitalWrite(todayLedPin, HIGH) : digitalWrite(todayLedPin, LOW);
+          isEjpTomorrow ? digitalWrite(tomorrowLedPin, HIGH) : digitalWrite(tomorrowLedPin, LOW);
+
+          success = true;
+        } else {
+          Serial.println("Error parsing JSON");
         }
-        if (strcmp(todayStatus, "EJP") == 0) {
-          isEjpToday = true;
-          digitalWrite(todayLedPin, HIGH);
-        }
-
-        // Printing values for now, connecting to LED later
-        Serial.print("Is EJP Today: ");
-        Serial.println(isEjpToday);
-        Serial.print("Is EJP Tomorrow: ");
-        Serial.println(isEjpTomorrow);
-
-        isEjpToday ? digitalWrite(todayLedPin, HIGH) : digitalWrite(todayLedPin, LOW);
-        isEjpTomorrow ? digitalWrite(tomorrowLedPin, HIGH) : digitalWrite(tomorrowLedPin, LOW);
       } else {
-        Serial.println("Error parsing JSON");
+        Serial.println("Error in HTTP request");
       }
+      http.end();
     } else {
-      Serial.println("Error in HTTP request");
+      Serial.println("Failed to connect to API");
     }
-    http.end();
-  } else {
-    Serial.println("Failed to connect to API");
+    delay(1000);
   }
+
+  errorOccured = !success;
 
   WiFi.disconnect(true);
 }

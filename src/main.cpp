@@ -26,7 +26,7 @@ const int errorLedPin = 4;
 const int checkTimes[] = {16, 18, 20}; // 4, 6, 8pm
 const int lengthCheckTimes = sizeof(checkTimes) / sizeof(checkTimes[0]);
 
-const int rateLimit = 5; // Request rate limit
+const int rateLimit = 10; // Request rate limit
 bool errorOccured = false;
 
 void fetchAndProcessEjpData() {
@@ -138,6 +138,38 @@ void fetchAndProcessEjpData() {
   WiFi.disconnect(true);
 }
 
+void animateError() {
+  digitalWrite(errorLedPin, HIGH);
+  delay(100);
+  digitalWrite(errorLedPin, LOW);
+  delay(5000);
+}
+
+void animateSuccess() {
+  digitalWrite(todayLedPin, LOW);
+  digitalWrite(tomorrowLedPin, LOW);
+  digitalWrite(errorLedPin, LOW);
+  for (int i = 0; i < 5; ++i) {
+    digitalWrite(todayLedPin, HIGH);
+    delay(100);
+    digitalWrite(todayLedPin, LOW);
+    digitalWrite(tomorrowLedPin, HIGH);
+    delay(100);
+    digitalWrite(tomorrowLedPin, LOW);
+    digitalWrite(errorLedPin, HIGH);
+    delay(100);
+    digitalWrite(errorLedPin, LOW);
+  }
+  for (int i = 0; i < 3; ++i) {
+    digitalWrite(todayLedPin, HIGH);
+    digitalWrite(tomorrowLedPin, HIGH);
+    delay(50);
+    digitalWrite(todayLedPin, LOW);
+    digitalWrite(tomorrowLedPin, LOW);
+    delay(50);
+  }
+}
+
 void setup() {
   Serial.begin(115200);
 
@@ -148,6 +180,10 @@ void setup() {
 
   // Initial data retrieval at setup, easier debugging
   fetchAndProcessEjpData();
+
+  if (!errorOccured) {
+    animateSuccess();
+  }
 }
 
 void loop() {
@@ -157,15 +193,15 @@ void loop() {
   for (int i = 0; i < lengthCheckTimes; ++i) {
     if (timeClient.getHours() == checkTimes[i] && timeClient.getMinutes() == 0) {
       fetchAndProcessEjpData();
+      if (!errorOccured) {
+        animateSuccess();
+      }
       // Prevent calling two times during the same minute
       delay(60000);
     }
   }
 
   if (errorOccured) {
-    digitalWrite(errorLedPin, HIGH);
-    delay(100);
-    digitalWrite(errorLedPin, LOW);
-    delay(5000);
+    animateError();
   }
 }

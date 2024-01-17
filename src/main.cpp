@@ -2,6 +2,7 @@
 #include <WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
+#include <HTTPClient.h>
 
 const char *ssid = "ssid";
 const char *password = "password";
@@ -11,6 +12,9 @@ const long gmtOffset = 3600; // GMT offset in seconds (same as UTC + 1)
 WiFiUDP ntpUDP;
 // Setup NTP server
 NTPClient timeClient(ntpUDP, "pool.ntp.org", gmtOffset);
+
+// Base URL for EDF API Call
+const char *baseUrl = "https://api-commerce.edf.fr/commerce/activet/v1/calendrier-jours-effacement?option=EJP&identifiantConsommateur=src";
 
 void setup() {
   Serial.begin(115200);
@@ -46,17 +50,24 @@ void setup() {
   char superiorLimit[11];
   snprintf(superiorLimit, sizeof(superiorLimit), "%04d-%02d-%02d", currentYear, timeinfo->tm_mon + 1, timeinfo->tm_mday + 1);
 
-  Serial.print("Inferior Limit: ");
-  Serial.println(inferiorLimit);
-
-  Serial.print("Superior Limit: ");
-  Serial.println(superiorLimit);
-
-  // For testing
-  char time[9];
-  snprintf(time, sizeof(time), "%02d:%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-  Serial.print("Time verification: ");
-  Serial.println(time);
+  // Construct the full API url
+  String apiUrl = String(baseUrl) + "&dateApplicationBorneInf=" + inferiorLimit + "&dateApplicationBorneSup=" + superiorLimit;
+  Serial.println(apiUrl);
+  // Data fetching
+  HTTPClient http;
+  if (http.begin(apiUrl)) {
+    int httpCode = http.GET();
+    if (httpCode == HTTP_CODE_OK) {
+      String payload = http.getString(); // Formatting
+      Serial.println(payload);
+      // Process of the payload will go here
+    } else {
+      Serial.println("Error in HTTP request");
+    }
+    http.end();
+  } else {
+    Serial.println("Failed to connect to API");
+  }
 }
 
 void loop() {

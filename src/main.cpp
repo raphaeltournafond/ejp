@@ -20,12 +20,14 @@ const char *baseUrl = "https://api-commerce.edf.fr/commerce/activet/v1/calendrie
 // GPIO Setup
 const int todayLedPin = 12;
 const int tomorrowLedPin = 13;
+const int errorLedPin = 4;
 
 // Check at desired times, 24H format, default 16, 18, 20, modify as needed
 const int checkTimes[] = {16, 18, 20}; // 4, 6, 8pm
 const int lengthCheckTimes = sizeof(checkTimes) / sizeof(checkTimes[0]);
 
 const int rateLimit = 5; // Request rate limit
+bool errorOccured = false;
 
 void fetchAndProcessEjpData() {
   Serial.println("Checking for EJP days...");
@@ -42,8 +44,11 @@ void fetchAndProcessEjpData() {
     Serial.println("WiFi connected!");
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
+    errorOccured = false;
+    digitalWrite(errorLedPin, LOW); // Reset LED
   } else {
     Serial.println("Failed to connect to WiFi");
+    errorOccured = true;
     return;
   }
 
@@ -128,6 +133,7 @@ void setup() {
   // Init led state
   pinMode(todayLedPin, OUTPUT);
   pinMode(tomorrowLedPin, OUTPUT);
+  pinMode(errorLedPin, OUTPUT);
 
   // Initial data retrieval at setup, easier debugging
   fetchAndProcessEjpData();
@@ -143,5 +149,12 @@ void loop() {
       // Prevent calling two times during the same minute
       delay(60000);
     }
+  }
+
+  if (errorOccured) {
+    digitalWrite(errorLedPin, HIGH);
+    delay(100);
+    digitalWrite(errorLedPin, LOW);
+    delay(5000);
   }
 }

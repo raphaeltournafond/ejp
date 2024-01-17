@@ -17,8 +17,18 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org", gmtOffset);
 // Base URL for EDF API Call
 const char *baseUrl = "https://api-commerce.edf.fr/commerce/activet/v1/calendrier-jours-effacement?option=EJP&identifiantConsommateur=src";
 
+// GPIO Setup
+const int todayLedPin = 12;
+const int tomorrowLedPin = 13;
+
 void setup() {
   Serial.begin(115200);
+
+  // Init led state
+  pinMode(todayLedPin, OUTPUT);
+  pinMode(tomorrowLedPin, OUTPUT);
+  digitalWrite(todayLedPin, LOW);
+  digitalWrite(tomorrowLedPin, LOW);
 
   // Initiate WiFi connection
   WiFi.begin(ssid, password);
@@ -60,7 +70,6 @@ void setup() {
     int httpCode = http.GET();
     if (httpCode == HTTP_CODE_OK) { // TODO retry a few time if not working here
       String payload = http.getString(); // Formatting
-      Serial.println(payload);
       
       // Parsing payload
       JsonDocument doc;
@@ -78,9 +87,11 @@ void setup() {
         // EJP check
         if (strcmp(tomorrowStatus, "EJP") == 0) {
           isEjpTomorrow = true;
+          digitalWrite(tomorrowLedPin, HIGH);
         }
         if (strcmp(todayStatus, "EJP") == 0) {
           isEjpToday = true;
+          digitalWrite(todayLedPin, HIGH);
         }
 
         // Printing values for now, connecting to LED later

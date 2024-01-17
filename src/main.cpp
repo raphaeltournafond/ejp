@@ -46,9 +46,9 @@ void setup() {
 
   // Formatting to URL params
   char inferiorLimit[11];
-  snprintf(inferiorLimit, sizeof(inferiorLimit), "%04d-%02d-%02d", currentYear - 1, timeinfo->tm_mon + 1, timeinfo->tm_mday + 1);
+  snprintf(inferiorLimit, sizeof(inferiorLimit), "%04d-%01d-%01d", currentYear - 1, timeinfo->tm_mon + 1, timeinfo->tm_mday + 1);
   char superiorLimit[11];
-  snprintf(superiorLimit, sizeof(superiorLimit), "%04d-%02d-%02d", currentYear, timeinfo->tm_mon + 1, timeinfo->tm_mday + 1);
+  snprintf(superiorLimit, sizeof(superiorLimit), "%04d-%01d-%01d", currentYear, timeinfo->tm_mon + 1, timeinfo->tm_mday + 1);
 
   // Construct the full API url
   String apiUrl = String(baseUrl) + "&dateApplicationBorneInf=" + inferiorLimit + "&dateApplicationBorneSup=" + superiorLimit;

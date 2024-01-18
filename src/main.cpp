@@ -24,6 +24,7 @@ const int errorLedPin = 4;
 
 // Check at desired times, 24H format, default 16, 18, 20, modify as needed
 const int checkTimes[] = {16, 18, 20}; // 4, 6, 8pm
+const int minuteOffset = 0; // Smaller precision for fetch timing eg. if set to 30 then check will be at checkTimes + 30min
 const int lengthCheckTimes = sizeof(checkTimes) / sizeof(checkTimes[0]);
 
 const int rateLimit = 10; // Request rate limit
@@ -207,7 +208,7 @@ void loop() {
 
   // Check for EJP days at specified times
   for (int i = 0; i < lengthCheckTimes; ++i) {
-    if (timeClient.getHours() == checkTimes[i] && timeClient.getMinutes() == 0) {
+    if (timeClient.getHours() == checkTimes[i] && timeClient.getMinutes() == minuteOffset) {
       fetchAndProcessEjpData();
       if (!errorOccured) {
         animateSuccess();

@@ -152,11 +152,9 @@ void fetchAndProcessEjpData() {
           // EJP check
           if (strcmp(tomorrowStatus, "EJP") == 0) {
             isEjpTomorrow = true;
-            digitalWrite(tomorrowLedPin, HIGH);
           }
           if (strcmp(todayStatus, "EJP") == 0) {
             isEjpToday = true;
-            digitalWrite(todayLedPin, HIGH);
           }
 
           // Printing values for now, connecting to LED later

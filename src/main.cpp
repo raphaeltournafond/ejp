@@ -23,7 +23,7 @@ const int tomorrowLedPin = 13;
 const int errorLedPin = 4;
 
 // Check at desired times, 24H format, default 16, 18, 20, modify as needed
-const int checkTimes[] = {16, 18, 20, 23, 20}; // 4, 6, 8pm
+const int checkTimes[] = {16, 18, 20}; // 4, 6, 8pm
 const int lengthCheckTimes = sizeof(checkTimes) / sizeof(checkTimes[0]);
 
 const int rateLimit = 10; // Request rate limit

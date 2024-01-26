@@ -28,6 +28,7 @@ const int minuteOffset = 0; // Smaller precision for fetch timing eg. if set to 
 const int lengthCheckTimes = sizeof(checkTimes) / sizeof(checkTimes[0]);
 
 const int rateLimit = 10; // Request rate limit
+const int repeatDelay = 1000; // How much time we wait between each request
 bool errorOccured = true;
 
 void animateError() {
@@ -85,7 +86,7 @@ void fetchAndProcessEjpData() {
   WiFi.begin(ssid, password);
   
   for (int i = 0; i < rateLimit && WiFi.status() != WL_CONNECTED; ++i) {
-    delay(1000);
+    delay(repeatDelay);
     Serial.println("Connecting to WiFi...");
   }
 
@@ -177,7 +178,7 @@ void fetchAndProcessEjpData() {
     } else {
       Serial.println("Failed to connect to API");
     }
-    delay(1000);
+    delay(repeatDelay);
   }
 
   errorOccured = !success;
